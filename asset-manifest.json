@@ -1,19 +1,19 @@
 {
   "files": {
-    "main.css": "/static/css/main.b9e28b30.chunk.css",
-    "main.js": "/static/js/main.d07c61f3.chunk.js",
-    "main.js.map": "/static/js/main.d07c61f3.chunk.js.map",
-    "runtime-main.js": "/static/js/runtime-main.334f140d.js",
-    "runtime-main.js.map": "/static/js/runtime-main.334f140d.js.map",
-    "static/js/2.0dfd11cd.chunk.js": "/static/js/2.0dfd11cd.chunk.js",
-    "static/js/2.0dfd11cd.chunk.js.map": "/static/js/2.0dfd11cd.chunk.js.map",
-    "index.html": "/index.html",
-    "static/css/main.b9e28b30.chunk.css.map": "/static/css/main.b9e28b30.chunk.css.map",
-    "static/js/2.0dfd11cd.chunk.js.LICENSE.txt": "/static/js/2.0dfd11cd.chunk.js.LICENSE.txt",
-    "static/media/logo.17ea95f6.svg": "/static/media/logo.17ea95f6.svg"
+    "main.css": "/darknode-export/static/css/main.b9e28b30.chunk.css",
+    "main.js": "/darknode-export/static/js/main.d07c61f3.chunk.js",
+    "main.js.map": "/darknode-export/static/js/main.d07c61f3.chunk.js.map",
+    "runtime-main.js": "/darknode-export/static/js/runtime-main.c86524e3.js",
+    "runtime-main.js.map": "/darknode-export/static/js/runtime-main.c86524e3.js.map",
+    "static/js/2.0dfd11cd.chunk.js": "/darknode-export/static/js/2.0dfd11cd.chunk.js",
+    "static/js/2.0dfd11cd.chunk.js.map": "/darknode-export/static/js/2.0dfd11cd.chunk.js.map",
+    "index.html": "/darknode-export/index.html",
+    "static/css/main.b9e28b30.chunk.css.map": "/darknode-export/static/css/main.b9e28b30.chunk.css.map",
+    "static/js/2.0dfd11cd.chunk.js.LICENSE.txt": "/darknode-export/static/js/2.0dfd11cd.chunk.js.LICENSE.txt",
+    "static/media/logo.17ea95f6.svg": "/darknode-export/static/media/logo.17ea95f6.svg"
   },
   "entrypoints": [
-    "static/js/runtime-main.334f140d.js",
+    "static/js/runtime-main.c86524e3.js",
     "static/js/2.0dfd11cd.chunk.js",
     "static/css/main.b9e28b30.chunk.css",
     "static/js/main.d07c61f3.chunk.js"
