@@ -1,0 +1,4 @@
+export const DARKNODE_REGISTRY = "0x2D7b6C95aFeFFa50C068D50f89C5C0014e054f0A";
+export const DARKNODE_PAYMENT = "0x098e1708b920EFBdD7afe33Adb6a4CBa30c370B9";
+
+export const PUBLIC_ETHEREUM_ENDPOINT = `https://mainnet.infura.io/v3/${process.env.REACT_APP_INFURA_KEY}`;
