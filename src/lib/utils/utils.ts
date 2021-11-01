@@ -1,0 +1,53 @@
+import { Provider } from "@ethersproject/providers";
+
+// Get the timestamp of an Ethereum blocknumber.
+export const getBlockTimestamp = async (
+  provider: Provider,
+  blockNumber: number
+): Promise<number> => {
+  // The timestamp for previous epochs is stored here to reduce requests.
+  const cachedBlocks: { [blockNumber: number]: number } = {
+    9736764: 1585088629,
+    10116467: 1590162088,
+    10136381: 1590428882,
+    10112147: 1590102650,
+    10113312: 1590118148,
+    10113325: 1590118313,
+    10116519: 1590162645,
+    10142891: 1590516490,
+    10136389: 1590428946,
+    10150888: 1590623360,
+    11450536: 1607941154,
+    10136431: 1590429540,
+    11999657: 1615230593,
+    10177809: 1590984973,
+    10146806: 1590569404,
+    10147433: 1590577645,
+    10142821: 1590515510,
+    11268232: 1605521175,
+    12544546: 1622496423,
+    11633031: 1610360661,
+    10143478: 1590524404,
+    13444858: 1634601830,
+    12904750: 1627342603,
+    10142871: 1590516286,
+    12363660: 1620077141,
+    12725296: 1624920110,
+    10904038: 1600668769,
+    11817500: 1612809667,
+    13084619: 1629762371,
+    10539670: 1595827259,
+    13265751: 1632182357,
+    12181714: 1617653170,
+    10358601: 1593404910,
+    10143580: 1590525928,
+    10148303: 1590588847,
+    11084837: 1603089153,
+    10721358: 1598249068,
+  };
+  if (cachedBlocks[blockNumber]) {
+    return cachedBlocks[blockNumber];
+  }
+  const block = await provider.getBlock(blockNumber);
+  return block.timestamp;
+};

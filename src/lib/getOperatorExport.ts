@@ -1,65 +1,39 @@
-import BigNumber from "bignumber.js";
 import moment from "moment";
 
 import { Provider } from "@ethersproject/providers";
 
-import { AbiItem } from "./abiItem";
-import { TypedEvent } from "./ABIs/common";
 import DarknodeRegistryABI from "./ABIs/DarknodeRegistry.json";
-import { DARKNODE_REGISTRY } from "./constants";
+import { DARKNODE_REGISTRY } from "./utils/constants";
 import {
     fetchAssets,
     fetchRenVMRewards,
     fetchSubgraphRewards,
-} from "./fetchEpochRewards";
-import { getPastLogs } from "./getPastLogs";
+} from "./utils/fetchEpochRewards";
+import { getPastLogs } from "./utils/getPastLogs";
+import {
+    AbiItem,
+    Epoch,
+    LogDarknodeDeregistered,
+    LogDarknodeRefunded,
+    LogDarknodeRegistered,
+    LogNewEpoch,
+    OperatorExport,
+    RegistrationPeriod,
+    TaxableEvent,
+} from "./utils/types";
+import { getBlockTimestamp } from "./utils/utils";
 
-type LogNewEpoch = TypedEvent<
-  [BigNumber] & {
-    epochhash: BigNumber;
-  }
->;
-
-type LogDarknodeRegistered = TypedEvent<
-  [string, string, BigNumber] & {
-    _darknodeOperator: string;
-    _darknodeID: string;
-    amount: BigNumber;
-  }
->;
-
-type LogDarknodeDeregistered = TypedEvent<
-  [string, string] & {
-    _darknodeOperator: string;
-    _darknodeID: string;
-  }
->;
-
-type LogDarknodeRefunded = TypedEvent<
-  [string, string, BigNumber] & {
-    _darknodeOperator: string;
-    _darknodeID: string;
-    _amount: BigNumber;
-  }
->;
-
-export interface RegistrationPeriod {
-  darknodeID: string;
-  registered: number;
-  deregistered?: number;
-  refunded?: number;
-}
-
-export interface Epoch {
-  index: number;
-  startBlockNumber: number;
-  timestamp: number;
-}
-
-export const getDarknodeEvents = async (
+/**
+ * Generate a list of taxable events for a darknode operator.
+ *
+ * @param provider Ethers.js provider instance.
+ * @param operator The Ethereum address of the darknode operator.
+ * @returns
+ */
+export const getOperatorExport = async (
   provider: Provider,
   operator: string
-) => {
+): Promise<OperatorExport> => {
   const epochEvents = await getPastLogs<LogNewEpoch>(
     provider,
     DARKNODE_REGISTRY,
@@ -86,7 +60,7 @@ export const getDarknodeEvents = async (
   epochs = await Promise.all(
     epochs.map(async (e) => ({
       ...e,
-      timestamp: (await provider.getBlock(e.startBlockNumber)).timestamp,
+      timestamp: await getBlockTimestamp(provider, e.startBlockNumber),
     }))
   );
 
@@ -167,10 +141,10 @@ export const getDarknodeEvents = async (
   // Add up the amount of darknodes the operator had during each epoch.
   for (const registrationPeriod of registrationPeriods) {
     for (
-      // A darknode starts earning income when it goes from "pending registration"
+      // A darknode starts earning rewards when it goes from "pending registration"
       // to "registered".
       let epoch = registrationPeriod.registered;
-      // A darknode stops earning income one epoch before it goes from
+      // A darknode stops earning rewards one epoch before it goes from
       // "registered" to "pending refund" (ie it loses its last income).
       epoch <
       Math.min((registrationPeriod.deregistered || Infinity) - 1, currentEpoch);
@@ -180,26 +154,40 @@ export const getDarknodeEvents = async (
     }
   }
 
-  let csv = `Type,BuyAmount,BuyCurrency,SellAmount,SellCurrency,FeeAmount,FeeCurrency,Exchange,Group,Comment,Date\n`;
-
   const assets = await fetchAssets();
+
+  const taxableEvents: TaxableEvent[] = [];
 
   for (const epoch in claims) {
     for (const asset in epochRewards[epoch]) {
       const reward = epochRewards[epoch][asset];
-      const amount = reward * claims[epoch];
+      const amount = reward.times(claims[epoch]);
       const decimals = assets[asset.replace(/^ren/, "")];
       if (decimals === undefined) {
         throw new Error(`Unable to fetch asset decimals for ${asset}.`);
       }
-      const amountShifted = amount / 10 ** decimals;
+      const amountShifted = amount.shiftedBy(-decimals);
       const unixTimestamp = epochs.filter(
         (e) => e.index === parseInt(epoch, 10) + 1
       )[0].timestamp;
-      const timestamp = moment(unixTimestamp * 1000).format("MM/DD/YY HH:mm");
-      csv += `Income,${amountShifted},${asset},,,,,Darknode,,,${timestamp}\n`;
+      const timestamp = moment(unixTimestamp * 1000);
+      if (amountShifted.isGreaterThan(0)) {
+        taxableEvents.push({
+          amount: amountShifted.toFixed(),
+          asset,
+          timestamp,
+          epoch: parseInt(epoch),
+          activeDarknodes: claims[epoch],
+        });
+      }
     }
   }
 
-  return csv;
+  return {
+    date: moment(),
+    operator,
+    epochCount: new Set(taxableEvents.map((x) => x.epoch)).size,
+    darknodeCount: new Set(registrationPeriods.map((x) => x.darknodeID)).size,
+    events: taxableEvents,
+  };
 };

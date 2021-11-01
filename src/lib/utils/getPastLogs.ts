@@ -2,8 +2,8 @@ import { Interface, keccak256, Result } from "ethers/lib/utils";
 
 import { Provider } from "@ethersproject/providers";
 
-import { AbiItem } from "./abiItem";
-import { TypedEvent } from "./ABIs/common";
+import { TypedEvent } from "../ABIs/common";
+import { AbiItem } from "./types";
 
 const findABIMethod = (abi: AbiItem[], name: string) => {
   const first = abi.filter((item) => item.name === name)[0];

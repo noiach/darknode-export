@@ -1,7 +1,9 @@
-# Export Darknode rewards
+# Darknode Rewards Export
 
-Export Darknode rewards history to CSV for importing into crypto tax tools like [TokenTax.co](https://tokentax.co).
+Export all past darknode rewards for a RenVM darknode operator.
+
+To use, go to [renproject.github.io/darknode-export](https://renproject.github.io/darknode-export) and enter the Ethereum address you used to register your darknode.
 
 ## Screenshot
 
-![Screenshot](https://user-images.githubusercontent.com/2221955/139617754-1544dd1d-0b5d-4134-ab79-8bc9f36195a6.png)
+![Screenshot](https://user-images.githubusercontent.com/2221955/139747340-abd1e715-1038-4994-a908-1b01ead8f1dd.png)

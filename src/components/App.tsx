@@ -2,15 +2,18 @@ import React, { useCallback, useState } from "react";
 
 import { JsonRpcProvider } from "@ethersproject/providers";
 
-import { getDarknodeEvents } from "./lib/calculateRewards";
-import { PUBLIC_ETHEREUM_ENDPOINT } from "./lib/constants";
+import { getOperatorExport } from "../lib/getOperatorExport";
+import { PUBLIC_ETHEREUM_ENDPOINT } from "../lib/utils/constants";
+import { OperatorExport } from "../lib/utils/types";
+import { CSV } from "./CSV";
 import { ReactComponent as Logo } from "./logo.svg";
+import { Table } from "./Table";
 
 function App() {
   const [operator, setOperator] = useState<string>("");
   const [processing, setProcessing] = useState<boolean>(false);
   const [error, setError] = useState<string>();
-  const [result, setResult] = useState<string>();
+  const [operatorExport, setOperatorExport] = useState<OperatorExport>();
 
   const handleOperatorInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,13 +27,13 @@ function App() {
       e.preventDefault();
 
       setProcessing(true);
-      setResult(undefined);
+      setOperatorExport(undefined);
       setError(undefined);
 
       try {
         const provider = new JsonRpcProvider(PUBLIC_ETHEREUM_ENDPOINT);
-        const csv = await getDarknodeEvents(provider, operator);
-        setResult(csv);
+        const operatorExport = await getOperatorExport(provider, operator);
+        setOperatorExport(operatorExport);
       } catch (error: any) {
         setError(error.message);
       }
@@ -47,12 +50,15 @@ function App() {
             <div className="px-4 py-6 bg-white space-y-6 sm:px-6">
               <div className="flex items-center justify-left">
                 <Logo className="h-8 w-auto mr-2" />
-                <h1>Darknode Income CSV</h1>
+                <h1>Darknode Rewards Export</h1>
               </div>
               <p className="mt-2 text-sm text-gray-500">
-                Enter your operator address below to generate a CSV containing
-                Epoch income events. Rewards for multiple darknodes are combined
-                into a single event per asset. The CSV format is compatible with{" "}
+                Enter your operator address below to generate a list of past
+                darknode rewards. Rewards for multiple darknodes are combined
+                into a single event per asset. Note - up until Epoch 15,
+                darknodes required ETH to claim rewards - this tool currently
+                assumes all claims were made. The downloadable CSV format is
+                compatible with{" "}
                 <a
                   target="_blank"
                   rel="noreferrer noopener"
@@ -118,18 +124,40 @@ function App() {
         </div>
       </div>
 
-      {result ? (
-        <div className="w-screen max-w-5xl mt-1 ml-auto mr-auto p-1">
-          <div className="p-5 shadow sm:rounded-md sm:overflow-hidden container ml-auto mr-auto bg-gray-50">
-            <pre>
-              <code>{result}</code>
-            </pre>
+      {operatorExport ? (
+        <div className="w-screen max-w-5xl mt-2 ml-auto mr-auto p-1">
+          <div className="p-5 shadow sm:rounded-md sm:overflow-hidden container ml-auto mr-auto bg-gray-50 mb-4">
+            <div className="mb-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Summary
+            </div>
+            <div className="text-sm text-gray-900">
+              <a
+                target="_blank"
+                rel="noreferrer noopener"
+                href={`https://etherscan.io/address/${operatorExport.operator}`}
+                className="text-blue-900"
+              >
+                {operatorExport.operator.slice(0, 8)}...
+                {operatorExport.operator.slice(-6)}
+              </a>{" "}
+              had {operatorExport.darknodeCount} darknodes active over{" "}
+              {operatorExport.epochCount} epochs. Generated on{" "}
+              {operatorExport.date.format("LLL")}.
+            </div>
+            <br />
+            <div className="text-sm text-gray-900">
+              <CSV
+                operator={operatorExport.operator}
+                taxableEvents={operatorExport.events}
+              />
+            </div>
           </div>
+          <Table taxableEvents={operatorExport.events} />
         </div>
       ) : null}
 
       {error ? (
-        <div className="w-screen max-w-5xl mt-1 ml-auto mr-auto p-1">
+        <div className="w-screen max-w-5xl mt-4 ml-auto mr-auto p-1">
           <div className="p-5 shadow sm:rounded-md sm:overflow-hidden container ml-auto mr-auto bg-gray-50">
             <p className="text-red">Error: {error}</p>
           </div>

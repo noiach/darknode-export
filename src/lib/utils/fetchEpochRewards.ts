@@ -1,6 +1,7 @@
 import Axios from "axios";
+import BigNumber from "bignumber.js";
 
-import { Epoch } from "./calculateRewards";
+import { Epoch } from "./types";
 
 export const fetchRenVMRewards = async () => {
   const response = await Axios.post("https://lightnode-mainnet.herokuapp.com", {
@@ -12,7 +13,7 @@ export const fetchRenVMRewards = async () => {
 
   const data = response.data;
 
-  const epochs: { [epoch: number]: { [asset: string]: number } } = {};
+  const epochs: { [epoch: number]: { [asset: string]: BigNumber } } = {};
 
   for (const asset of Object.keys(data.result.state.v)) {
     const fees = data.result.state.v[asset].fees?.epochs;
@@ -23,7 +24,9 @@ export const fetchRenVMRewards = async () => {
     for (const epoch of fees) {
       const index = parseInt(epoch.epoch, 10) + 14;
       epochs[index] = epochs[index] || {};
-      epochs[index][asset] = Math.floor(epoch.amount / epoch.numNodes);
+      epochs[index][asset] = new BigNumber(epoch.amount)
+        .dividedBy(epoch.numNodes)
+        .integerValue();
     }
   }
 
@@ -53,7 +56,7 @@ export const fetchSubgraphRewards = async (epochDetails: Epoch[]) => {
     }
   );
 
-  const epochs: { [epoch: number]: { [asset: string]: number } } = {};
+  const epochs: { [epoch: number]: { [asset: string]: BigNumber } } = {};
 
   for (const epoch of response.data.data.epoches) {
     // The Subgraph epoch contains the reward shares for the previous epoch.
@@ -66,7 +69,7 @@ export const fetchSubgraphRewards = async (epochDetails: Epoch[]) => {
         continue;
       }
       epochs[epochIndex] = epochs[epochIndex] || {};
-      epochs[epochIndex][reward.symbol] = reward.amount;
+      epochs[epochIndex][reward.symbol] = new BigNumber(reward.amount);
     }
   }
 
