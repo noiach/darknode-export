@@ -29,7 +29,8 @@ export interface OperatorExport {
   date: Moment;
   operator: string;
   epochCount: number;
-  darknodeCount: number;
+  activeDarknodes: number;
+  totalDarknodes: number;
   events: TaxableEvent[];
 }
 

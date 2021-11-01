@@ -138,6 +138,8 @@ export const getOperatorExport = async (
 
   const claims: { [epoch: number]: number } = {};
 
+  const activeDarknodes = new Set<string>();
+
   // Add up the amount of darknodes the operator had during each epoch.
   for (const registrationPeriod of registrationPeriods) {
     for (
@@ -151,6 +153,7 @@ export const getOperatorExport = async (
       epoch++
     ) {
       claims[epoch] = (claims[epoch] || 0) + 1;
+      activeDarknodes.add(registrationPeriod.darknodeID);
     }
   }
 
@@ -183,11 +186,20 @@ export const getOperatorExport = async (
     }
   }
 
+  // List of epochs the operator earned rewards in.
+  const epochCount = new Set(taxableEvents.map((x) => x.epoch)).size;
+
+  // Some darknodes may not have earned rewards - either because they were
+  // deregistered too quickly, or because they have just been registered.
+  const totalDarknodes = new Set(registrationPeriods.map((x) => x.darknodeID))
+    .size;
+
   return {
     date: moment(),
     operator,
-    epochCount: new Set(taxableEvents.map((x) => x.epoch)).size,
-    darknodeCount: new Set(registrationPeriods.map((x) => x.darknodeID)).size,
+    epochCount,
+    activeDarknodes: activeDarknodes.size,
+    totalDarknodes,
     events: taxableEvents,
   };
 };

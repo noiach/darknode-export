@@ -104,7 +104,7 @@ function App() {
                           cy="12"
                           r="10"
                           stroke="currentColor"
-                          stroke-width="4"
+                          strokeWidth="4"
                         ></circle>
                         <path
                           className="opacity-75"
@@ -140,8 +140,13 @@ function App() {
                 {operatorExport.operator.slice(0, 8)}...
                 {operatorExport.operator.slice(-6)}
               </a>{" "}
-              had {operatorExport.darknodeCount} darknodes active over{" "}
-              {operatorExport.epochCount} epochs. Generated on{" "}
+              earned rewards from {operatorExport.activeDarknodes} darknode
+              {operatorExport.activeDarknodes !== 1 ? "s" : ""}{" "}
+              {operatorExport.activeDarknodes !==
+              operatorExport.totalDarknodes ? (
+                <>(out of {operatorExport.totalDarknodes} darknodes)</>
+              ) : null}{" "}
+              over {operatorExport.epochCount} epochs. Generated on{" "}
               {operatorExport.date.format("LLL")}.
             </div>
             <br />
